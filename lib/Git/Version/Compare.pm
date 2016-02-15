@@ -65,7 +65,7 @@ sub _normalize {
     return undef if !defined $v;
 
     # reformat git.git tag names
-    $v =~ s/^v//;
+    $v =~ s/^v|\.msysgit.*//g;
     $v =~ y/-/./;
     $v =~ s/0rc/0.rc/;
     return $version_alias{$v} if defined $version_alias{$v};
