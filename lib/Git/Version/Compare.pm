@@ -185,6 +185,84 @@ Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, and C<ne_git>.
 Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, C<ne_git>,
 and C<cmp_git>.
 
+=head1 EVERYTHING YOU EVER WANTED TO KNOW ABOUT GIT VERSIONS
+
+=head1 Version numbers
+
+Version numbers as returned by C<git --version> are in the following
+formats (since the C<1.4> series, in 2006):
+
+    # stable version
+    1.6.0
+    2.7.1
+
+    # maintenance release
+    1.8.5.6
+
+    # release candidate
+    1.6.0.rc2
+
+    # development version
+    # (the last two elements come from `git describe`)
+    1.7.1.209.gd60ad
+    1.8.5.1.21.gb2a0afd
+    2.3.0.rc0.36.g63a0e83
+
+In the C<git.git> repository, several commits have multiple tags
+(e.g. C<v1.0.1> and C<v1.0.2> point respectively to C<v1.0.0a>
+and C<v1.0.0b>). Pre-1.0.0 versions also have non-standard formats
+like C<0.99.9j> or C<1.0rc2>.
+
+This explains why:
+
+    # this is true
+    eq_git( '0.99.9l', '1.0rc4' );
+    eq_git( '1.0.0a',  '1.0.1' );
+
+    # this is false
+    ge_git( '1.0rc3', '0.99.9m' );
+
+`git --version` appeared in version C<0.99.7>. Before that, there is no
+way to know which version of Git one is dealing with.
+
+C<Git::Version::Compare> converts all version numbers to an internal
+format before performing a simple string comparison.
+
+=head2 Development versions
+
+Prior to C<1.4.0-rc1> (June 2006), compiling a development version of Git
+would lead C<git --version> to output C<1.x-GIT> (with C<x> in C<0 .. 3>),
+which would make comparing versions that are very close a futile exercise.
+
+Other issues exist when comparing development version numbers with one
+another. For example, C<1.7.1.1> is greater than both C<1.7.1.1.gc8c07>
+and C<1.7.1.1.g5f35a>, and C<1.7.1> is less than both. Obviously,
+C<1.7.1.1.gc8c07> will compare as greater than C<1.7.1.1.g5f35a>
+(asciibetically), but in fact these two version numbers cannot be
+compared, as they are two siblings children of the commit tagged
+C<v1.7.1>). For practical purposes, the version-comparison methods
+declares them equal.
+
+Therefore:
+
+    # this is true
+    lt_git( '1.8.5.4.8.g7c9b668', '1.8.5.4.19.g5032098' );
+    gt_git( '1.3.GIT', '1.3.0' );
+
+    # this is false
+    ne_git( '1.7.1.1.gc8c07', '1.7.1.1.g5f35a' );
+    gt_git( '1.3.GIT', '1.3.1' );
+
+If one were to compute the set of all possible version numbers (as returned
+by C<git --version>) for all git versions that can be compiled from each
+commit in the F<git.git> repository, the result would not be a totally ordered
+set. Big deal.
+
+Also, don't be too precise when requiring the minimum version of Git that
+supported a given feature. The precise commit in git.git at which a given
+feature was added doesn't mean as much as the release branch in which that
+commit was merged.
+
 =head1 COPYRIGHT
 
 Copyright 2016 Philippe Bruhat (BooK), all rights reserved.
