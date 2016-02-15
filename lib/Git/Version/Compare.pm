@@ -67,10 +67,16 @@ my %version_alias = (
 );
 
 sub _normalize {
-    return undef if !defined $_[0];
-    return $version_alias{$_[0]} if defined $version_alias{$_[0]};
+    my ($v) = @_;
+    return undef if !defined $v;
 
-    my @v = split /\./, $_[0];
+    # reformat git.git tag names
+    $v =~ s/^v//;
+    $v =~ y/-/./;
+    $v =~ s/0rc/0.rc/;
+    return $version_alias{$v} if defined $version_alias{$v};
+
+    my @v = split /\./, $v;
     my ( $r, $c ) = ( 0, 0 );
 
     # commit count since the previous tag
