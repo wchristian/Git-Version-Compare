@@ -11,7 +11,7 @@ my @ops = qw( lt gt le ge eq ne );
 
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ( map "${_}_git", cmp => @ops );
-our %EXPORT_TAGS = ( ops => [ map "${_}_git", @ops ] );
+our %EXPORT_TAGS = ( ops => [ map "${_}_git", @ops ], all => \@EXPORT_OK );
 
 # A few versions have two tags, or non-standard numbering:
 # - the left-hand side is what `git --version` reports
