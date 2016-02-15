@@ -22,6 +22,9 @@ for ( 0 .. $#version ) {
     push @lesser, "@v";
 }
 
+# an rc is always lesser
+push @lesser, join '.', @version, 'rc1';
+
 # more complex comparisons
 my @true = (
     [ '1.7.2.rc0.13.gc9eaaa', 'eq_git', '1.7.2.rc0.13.gc9eaaa' ],
