@@ -173,6 +173,17 @@ A Git-aware version of the C<ne> operator.
 
 A Git-aware version of the C<cmp> operator.
 
+=head1 EXPORT TAGS
+
+=head2 :ops
+
+Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, and C<ne_git>.
+
+=head2 :all
+
+Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, C<ne_git>,
+and C<cmp_git>.
+
 =head1 COPYRIGHT
 
 Copyright 2016 Philippe Bruhat (BooK), all rights reserved.
