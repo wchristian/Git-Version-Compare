@@ -263,6 +263,11 @@ supported a given feature. The precise commit in git.git at which a given
 feature was added doesn't mean as much as the release branch in which that
 commit was merged.
 
+=head1 SEE ALSO
+
+L<Test::Requires::Git>, for defining Git version requirements in test
+scripts that need B<git>.
+
 =head1 COPYRIGHT
 
 Copyright 2016 Philippe Bruhat (BooK), all rights reserved.
