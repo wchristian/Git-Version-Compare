@@ -7,11 +7,11 @@ use Exporter;
 use Scalar::Util qw( looks_like_number );
 use namespace::clean;
 
-our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw(
-  _version_eq _version_gt
-  cmp_git
-);
+my @ops = qw( lt gt le ge eq ne );
+
+our @ISA         = qw(Exporter);
+our @EXPORT_OK   = ( map "${_}_git", cmp => @ops );
+our %EXPORT_TAGS = ( ops => [ map "${_}_git", @ops ] );
 
 # A few versions have two tags, or non-standard numbering:
 # - the left-hand side is what `git --version` reports
@@ -83,20 +83,21 @@ sub _normalize {
       . sprintf( '.%03d', $c );
 }
 
-sub _version_eq {
-    my ( $v1, $v2 ) = @_;
-    $_ = $version_alias{$_} ||= _normalize( $_ ) for $v1, $v2;    # aliases
-    return $v1 eq $v2;
-}
-
-sub _version_gt {
-    my ( $v1, $v2 ) = @_;
-    $_ = $version_alias{$_} ||= _normalize( $_ ) for $v1, $v2;    # aliases
-    return $v1 gt $v2;
+for my $op (@ops) {
+    no strict 'refs';
+    *{"${op}_git"} = eval << "OP";
+    sub {
+        my ( \$v1, \$v2 ) = \@_;
+        \$_ = \$version_alias{\$_} ||= _normalize( \$_ ) for \$v1, \$v2;
+        return \$v1 $op \$v2;
+    }
+OP
 }
 
 sub cmp_git ($$) {
-    return _version_gt( $_[0], $_[1] ) || -_version_gt( $_[1], $_[0] );
+    my ( $v1, $v2 ) = @_;
+    $_ = $version_alias{$_} ||= _normalize( $_ ) for $v1, $v2;
+    return $v1 cmp $v2;
 }
 
 1;
@@ -127,6 +128,42 @@ was accumulated while developping L<Git::Repository>.
 =head1 AVAILABLE FUNCTIONS
 
 By default L<Git::Version::Compare> does not export any subroutines.
+
+=head2 lt_git
+
+    if ( lt_git( $v1, $v2 ) ) { ... }
+
+A Git-aware version of the C<lt> operator.
+
+=head2 gt_git
+
+    if ( gt_git( $v1, $v2 ) ) { ... }
+
+A Git-aware version of the C<gt> operator.
+
+=head2 le_git
+
+    if ( le_git( $v1, $v2 ) ) { ... }
+
+A Git-aware version of the C<le> operator.
+
+=head2 ge_git
+
+    if ( ge_git( $v1, $v2 ) ) { ... }
+
+A Git-aware version of the C<ge> operator.
+
+=head2 eq_git
+
+    if ( eq_git( $v1, $v2 ) ) { ... }
+
+A Git-aware version of the C<eq> operator.
+
+=head2 ne_git
+
+    if ( ne_git( $v1, $v2 ) ) { ... }
+
+A Git-aware version of the C<ne> operator.
 
 =head2 cmp_git
 
