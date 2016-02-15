@@ -67,6 +67,8 @@ my %version_alias = (
 );
 
 sub _normalize {
+    return undef if !defined $_[0];
+
     my @v = split /\./, $_[0];
     my ( $r, $c ) = ( 0, 0 );
 
