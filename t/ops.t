@@ -75,6 +75,8 @@ my @true = (
     [ 'v1.7.1',               'lt_git', '1.7.1.1.g5f35a' ],
     [ '1.0.0a',               'ne_git', 'v1.0.0' ],
     [ 'v1.0.0b',              'eq_git', '1.0.2' ],
+    # output of `git --version`
+    [ 'git version 2.7.0',    'eq_git', '2.7'   ],
 );
 
 # operator reversal: $a op $b <=> $b rop $a
