@@ -128,6 +128,9 @@ dealing with Git-related things (like versions) a little bit easier.
 These routines collect the knowledge about Git versions that
 was accumulated while developping L<Git::Repository>.
 
+The strings to compare can be version numbers, tags from C<git.git>
+or the output of C<git version> or C<git describe>.
+
 =head1 AVAILABLE FUNCTIONS
 
 By default L<Git::Version::Compare> does not export any subroutines.
