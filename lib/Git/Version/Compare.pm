@@ -64,8 +64,8 @@ sub _normalize {
     my ($v) = @_;
     return undef if !defined $v;
 
-    # reformat git.git tag names
-    $v =~ s/^v|\.msysgit.*//g;
+    # reformat git.git tag names, output of `git --version`
+    $v =~ s/^v|^git version |\.msysgit.*//g;
     $v =~ y/-/./;
     $v =~ s/0rc/0.rc/;
     return $version_alias{$v} if defined $version_alias{$v};
