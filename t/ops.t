@@ -77,6 +77,9 @@ my @true = (
     [ 'v1.0.0b',              'eq_git', '1.0.2' ],
     # output of `git --version`
     [ 'git version 2.7.0',    'eq_git', '2.7'   ],
+    # commits very far from the tag (and very close to each other)
+    [ 'v1.5.3.7-1198-g467f42c', 'gt_git', 'v1.5.3.7-976-gcd39076'],
+
 );
 
 # operator reversal: $a op $b <=> $b rop $a
