@@ -3,3 +3,6 @@ Revision history for Git-Version-Compare
 {{$NEXT}}
 
 1.000 2016-02-19 BOOK
+    - Git::Version::Compare takes the knowledge about Git version numbers
+      that was accumulated while working on Git::Repository and offers
+      it in a module that does not depend on Git::Repository
