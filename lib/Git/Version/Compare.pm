@@ -3,14 +3,15 @@ package Git::Version::Compare;
 use strict;
 use warnings;
 use Exporter;
-
+use Carp;
 use Scalar::Util qw( looks_like_number );
+
 use namespace::clean;
 
 my @ops = qw( lt gt le ge eq ne );
 
 our @ISA         = qw(Exporter);
-our @EXPORT_OK   = ( map "${_}_git", cmp => @ops );
+our @EXPORT_OK   = ( looks_like_git => map "${_}_git", cmp => @ops );
 our %EXPORT_TAGS = ( ops => [ map "${_}_git", @ops ], all => \@EXPORT_OK );
 
 # A few versions have two tags, or non-standard numbering:
@@ -60,9 +61,21 @@ my %version_alias = (
     '1.0.0b'  => '01.00.02.00.00.0000',
 );
 
+sub looks_like_git {
+    return scalar $_[0] =~
+        /^(?:v|git\ version\ )?                               # prefix
+          [0-9]+(?:[.-](?:0[ab]?|[1-9][0-9a-z]*|[a-zA-Z]+))*  # x.y.z.*
+          (?:[.-]?rc[0-9]+)?                                  # rc
+          (?:[.-](GIT|[1-9][0-9]*[.-]g[A-Fa-f0-9]+))?         # devel
+         $/x;
+}
+
 sub _normalize {
     my ($v) = @_;
     return undef if !defined $v;
+
+    # minimal consistency check
+    croak "$v does not look like a Git version" if !looks_like_git($v);
 
     # reformat git.git tag names, output of `git --version`
     $v =~ s/^v|^git version |\.msysgit.*//g;
@@ -177,6 +190,18 @@ A Git-aware version of the C<ne> operator.
 
 A Git-aware version of the C<cmp> operator.
 
+=head2 looks_like_git
+
+    # true
+    looks_like_git(`git version`);    # duh
+
+    # false
+    looks_like_git('v1.7.3_02');      # no _ in git versions
+
+Given a string, returns true if it looks like a Git version number
+(and can therefore be parsed by C<Git::Version::Number>) and false
+otherwise.
+
 =head1 EXPORT TAGS
 
 =head2 :ops
@@ -186,7 +211,7 @@ Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, and C<ne_git>.
 =head2 :all
 
 Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, C<ne_git>,
-and C<cmp_git>.
+C<cmp_git>, and C<looks_like_git>.
 
 =head1 EVERYTHING YOU EVER WANTED TO KNOW ABOUT GIT VERSION NUMBERS
 
