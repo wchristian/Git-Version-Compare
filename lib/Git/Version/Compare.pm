@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Exporter;
 use Carp;
-use Scalar::Util qw( looks_like_number );
 
 use namespace::clean;
 
