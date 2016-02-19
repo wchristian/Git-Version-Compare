@@ -125,11 +125,11 @@ Git::Version::Compare - Functions to compare Git versions
 L<Git::Version::Compare> contains a selection of subroutines that make
 dealing with Git-related things (like versions) a little bit easier.
 
-These routines collect the knowledge about Git versions that
-was accumulated while developping L<Git::Repository>.
-
 The strings to compare can be version numbers, tags from C<git.git>
 or the output of C<git version> or C<git describe>.
+
+These routines collect the knowledge about Git versions that
+was accumulated while developing L<Git::Repository>.
 
 =head1 AVAILABLE FUNCTIONS
 
@@ -192,7 +192,7 @@ and C<cmp_git>.
 
 =head1 Version numbers
 
-Version numbers as returned by C<git --version> are in the following
+Version numbers as returned by C<git version> are in the following
 formats (since the C<1.4> series, in 2006):
 
     # stable version
