@@ -225,7 +225,8 @@ This explains why:
     # this is false
     ge_git( '1.0rc3', '0.99.9m' );
 
-`git --version` appeared in version C<0.99.7>. Before that, there is no
+C<git version> appeared in version C<1.3.0>.
+C<git --version> appeared in version C<0.99.7>. Before that, there is no
 way to know which version of Git one is dealing with.
 
 C<Git::Version::Compare> converts all version numbers to an internal
