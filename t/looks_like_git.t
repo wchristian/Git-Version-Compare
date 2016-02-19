@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
-use Git::Version::Compare qw( looks_like_git );
+use Git::Version::Compare qw( looks_like_git eq_git );
 
 my @ok = (
 
@@ -35,7 +35,14 @@ my @ok = (
 # non-git version
 my @fail = ( 'this is a test', '1.0203', '1.02_03', );
 
-plan tests => @ok + @fail;
+plan tests => @ok + @fail + 2;
 
 ok( looks_like_git($_), $_ ) for @ok;
 ok( !looks_like_git($_), "'$_' is not a Git version" ) for @fail;
+
+ok( !eval { eq_git( 'not-a-git-version', '1.0.0' ); 1 }, 'not a git version' );
+like(
+    $@,
+    qr/^not-a-git-version does not look like a Git version /,
+    '.. expected error message'
+);

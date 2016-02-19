@@ -147,6 +147,9 @@ was accumulated while developing L<Git::Repository>.
 
 By default L<Git::Version::Compare> does not export any subroutines.
 
+All the comparison version functions die when given strings that do not
+look like Git version numbers (the check is done with L</looks_like_git>).
+
 =head2 lt_git
 
     if ( lt_git( $v1, $v2 ) ) { ... }
