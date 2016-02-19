@@ -188,7 +188,7 @@ Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, and C<ne_git>.
 Exports C<lt_git>, C<gt_git>, C<le_git>, C<ge_git>, C<eq_git>, C<ne_git>,
 and C<cmp_git>.
 
-=head1 EVERYTHING YOU EVER WANTED TO KNOW ABOUT GIT VERSIONS
+=head1 EVERYTHING YOU EVER WANTED TO KNOW ABOUT GIT VERSION NUMBERS
 
 =head1 Version numbers
 
