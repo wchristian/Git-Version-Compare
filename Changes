@@ -2,6 +2,12 @@ Revision history for Git-Version-Compare
 
 {{$NEXT}}
 
+1.001 2016-02-20 BOOK
+    - Changed the internal format used for comparisons to fix an issue
+      with version numbers like v1.5.3.7-1198-g467f42c
+    - looks_like_git returns a boolean if the string looks like a git version
+    - _normalize now dies if the version does not look like a git version
+
 1.000 2016-02-19 BOOK
     - Git::Version::Compare takes the knowledge about Git version numbers
       that was accumulated while working on Git::Repository and offers
