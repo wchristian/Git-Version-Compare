@@ -44,5 +44,5 @@ ok( !eval { eq_git( 'not-a-git-version', '1.0.0' ); 1 }, 'not a git version' );
 like(
     $@,
     qr/^not-a-git-version does not look like a Git version /,
-    '.. expected error message'
+    '... expected error message'
 );
