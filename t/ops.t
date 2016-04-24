@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 use Scalar::Util qw( looks_like_number );
-use Git::Version::Compare qw( :ops );
+use Git::Version::Compare qw( :all );
 
 # pick up a random git version
 my $version = shift @ARGV || join '.', int( 1 + rand 4 ), map int rand 13, 1 .. 2 + rand 2;
@@ -99,12 +99,19 @@ my %negate = (
     le_git => 'gt_git',
     lt_git => 'ge_git',
 );
+my %cmp = (
+    lt_git => -1,
+    eq_git => 0,
+    gt_git => 1,
+);
+
 @true = (
     @true,
     map { [ $_->[2], $reverse{ $_->[1] }, $_->[0], $_->[3] || () ] } @true
 );
 
-plan tests => 4 + 6 * @lesser + 6 * @greater + 2 * @true;
+plan tests => 5 + 7 * @lesser + 7 * @greater + 2 * @true
+            + 2 * grep exists $cmp{ $_->[1] }, @true;
 
 # eq_git
 ok( eq_git($version, $version), "$version eq $version" );
@@ -130,6 +137,11 @@ ok( !le_git($version, $_), "$version not le $_" ) for @lesser;
 ok( ge_git($version, $_), "$version ge $_" ) for $version, @lesser;
 ok( !ge_git($version, $_), "$version not ge $_" ) for @greater;
 
+# cmp_git
+is( cmp_git($version, $version), 0, "$version eq $version" );
+is( cmp_git($version, $_), -1, "$version cmp $_" ) for @greater;
+is( cmp_git($version, $_), 1, "$version cmp $_" ) for @lesser;
+
 # test a number of special cases
 for (@true) {
     my ( $v1, $op, $v2 ) = @$_;
@@ -138,4 +150,11 @@ for (@true) {
     no strict 'refs';
     ok( &$op($v1, $v2), "$v1 $op $v2" );
     ok( !&$nop($v1, $v2), "$v1 not $nop $v2" );
+
+    for ( $op ) {
+        if ( exists $cmp{$_} ) {
+            is( cmp_git( $v1, $v2 ), $cmp{$_},  "$v1 cmp $v2" );
+            is( cmp_git( $v2, $v1 ), -$cmp{$_}, "$v2 cmp $v1" );
+        }
+    }
 }
