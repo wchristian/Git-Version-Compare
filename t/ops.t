@@ -131,13 +131,11 @@ ok( ge_git($version, $_), "$version ge $_" ) for $version, @lesser;
 ok( !ge_git($version, $_), "$version not ge $_" ) for @greater;
 
 # test a number of special cases
-my $dev;
-
 for (@true) {
-    ( $dev, my $op, my $v ) = @$_;
-    no strict 'refs';
-    ok( &$op($dev, $v), "$dev $op $v" );
-    $op = $negate{$op};
-    ok( !&$op($dev, $v), "$dev not $op $v" );
-}
+    my ( $v1, $op, $v2 ) = @$_;
+    my $nop = $negate{$op};
 
+    no strict 'refs';
+    ok( &$op($v1, $v2), "$v1 $op $v2" );
+    ok( !&$nop($v1, $v2), "$v1 not $nop $v2" );
+}
