@@ -2,159 +2,133 @@ use strict;
 use warnings;
 use Test::More;
 
-use Scalar::Util qw( looks_like_number );
+use List::Util qw( sum shuffle );
 use Git::Version::Compare qw( :all );
 
-# pick up a random git version
-my $version = shift @ARGV || join '.', int( 1 + rand 4 ), map int rand 13, 1 .. 2 + rand 2;
-diag "fake git version $version";
+# a few useful subroutines
+my $shuffle = 3;
 
-# other versions based on the current one
-my @version = split /\./, $version;
-my ( @lesser, @greater );
-for ( 0 .. $#version ) {
-    local $" = '.';
-    my @v = @version;
-    next if !looks_like_number( $v[$_] );
-    $v[$_]++;
-    push @greater, "@v";
-    next if 0 > ( $v[$_] -= 2 );
-    push @lesser, "@v";
+sub plan_for {
+    my $sorted = shift;
+    return $shuffle    # shuffle rounds
+     + @$sorted        # self-equality
+     + 7 * ( @$sorted * ( @$sorted - 1 ) )    # compare with all successors
 }
 
-# an rc is always lesser
-push @lesser, join '.', @version, 'rc1';
+sub test_sorted {
+    my $sorted = shift;
 
-# more complex comparisons
-my @true = (
-    [ '1.7.2.rc0.13.gc9eaaa', 'eq_git', '1.7.2.rc0.13.gc9eaaa' ],
-    [ '1.7.2.rc0.13.gc9eaaa', 'ge_git', '1.7.2.rc0.13.gc9eaaa' ],
-    [ '1.7.2.rc0.13.gc9eaaa', 'le_git', '1.7.2.rc0.13.gc9eaaa' ],
-    [ '1.7.1',                'gt_git', '1.7.1.rc0' ],
-    [ '1.7.1.rc1',            'gt_git', '1.7.1.rc0' ],
-    [ '1.3.2',                'gt_git', '0.99' ],
-    [ '1.7.2.rc0.13.gc9eaaa', 'gt_git', '1.7.0.4' ],
-    [ '1.7.1.rc2',            'gt_git', '1.7.1.rc1' ],
-    [ '1.7.2.rc0.1.g078e',    'gt_git', '1.7.2.rc0' ],
-    [ '1.7.2.rc0.10.g1ba5c',  'gt_git', '1.7.2.rc0.1.g078e' ],
-    [ '1.7.1.1',              'gt_git', '1.7.1.1.gc8c07' ],
-    [ '1.7.1.1',              'gt_git', '1.7.1.1.g5f35a' ],
-    [ '1.0.0b',               'gt_git', '1.0.0a' ],
-    [ '1.0.3',                'gt_git', '1.0.0a' ],
-    [ '1.7.0.4',              'ne_git', '1.7.2.rc0.13.gc9eaaa' ],
-    [ '1.7.1.rc1',            'ne_git', '1.7.1.rc2' ],
-    [ '1.0.0a',               'ne_git', '1.0.0' ],
-    [ '1.4.0.rc1',            'le_git', '1.4.1' ],
-    [ '1.0.0a',               'gt_git', '1.0.0' ],
-    [ '1.0.0a',               'lt_git', '1.0.3' ],
-    [ '1.0.0a',               'eq_git', '1.0.1' ],
-    [ '1.0.0b',               'eq_git', '1.0.2' ],
-    # the 0.99 series
-    [ '0.99',                 'lt_git', '1.0.2' ],
-    [ '0.99',                 'lt_git', '0.99.7a' ],
-    [ '0.99.9c',              'lt_git', '0.99.9g' ],
-    [ '0.99.7c',              'lt_git', '0.99.7d' ],
-    [ '0.99.7c',              'lt_git', '0.99.8' ],
-    [ '1.0.rc2',              'eq_git', '0.99.9i' ],
-    # non-standard versions
-    [ '1.7.1.236.g81fa0',     'gt_git', '1.7.1' ],
-    [ '1.7.1.236.g81fa0',     'lt_git', '1.7.1.1' ],
-    [ '1.7.1.211.g54fcb21',   'gt_git', '1.7.1.209.gd60ad81' ],
-    [ '1.7.1.211.g54fcb21',   'ge_git', '1.7.1.209.gd60ad81' ],
-    [ '1.7.1.209.gd60ad81',   'lt_git', '1.7.1.1.1.g66bd8ab' ],
-    [ '1.7.0.2.msysgit.0',    'gt_git', '1.6.6' ],
-    [ '1.7.1',                'lt_git', '1.7.1.1.gc8c07' ],
-    [ '1.7.1',                'lt_git', '1.7.1.1.g5f35a' ],
-    [ '1.7.1.1',              'gt_git', '1.7.1.1.gc8c07' ],
-    [ '1.7.1.1',              'gt_git', '1.7.1.1.g5f35a' ],
-    [ '1.7.1.1.gc8c07',       'eq_git', '1.7.1.1.g5f35a' ],
-    [ '1.3.GIT',              'gt_git',  '1.3.0' ],
-    [ '1.3.GIT',              'lt_git',  '1.3.1' ],
-    [ '0.99.9l',              'eq_git',  '1.0rc4' ],
-    # git tag names
-    [ 'v1.7.1',               'lt_git', '1.7.1.1.g5f35a' ],
-    [ '1.0.0a',               'ne_git', 'v1.0.0' ],
-    [ 'v1.0.0b',              'eq_git', '1.0.2' ],
-    # output of `git --version`
-    [ 'git version 2.7.0',    'eq_git', '2.7'   ],
-    # commits very far from the tag (and very close to each other)
-    [ 'v1.5.3.7-1198-g467f42c', 'gt_git', 'v1.5.3.7-976-gcd39076'],
+    # shuffle + sort
+    for ( 1 .. $shuffle ) {
+        my @shuffled = shuffle @$sorted;
+        is_deeply( [ sort cmp_git @shuffled ], $sorted, 'sort with cmp_git' )
+          or diag "@$sorted";
+    }
 
+    while ( my $v1 = shift @$sorted ) {
+
+        # reflexivity
+        ok( eq_git( $v1, $v1 ), "eq_git( $v1, $v1 )" );
+
+        for my $v2 (@$sorted) {
+
+            # lt gt le ge eq ne cmp
+            ok( lt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
+            ok( !gt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
+            ok( le_git( $v1, $v2 ), "le_git( $v1, $v2 )" );
+            ok( !ge_git( $v1, $v2 ), "ge_git( $v1, $v2 )" );
+            ok( !eq_git( $v1, $v2 ), "not eq_git( $v1, $v2 )" );
+            ok( ne_git( $v1, $v2 ), "ne_git( $v1, $v2 )" );
+            is( cmp_git( $v1, $v2 ), -1, "cmp_git( $v1, $v2 )" );
+
+            # reverse all
+            ok( !lt_git( $v2, $v1 ), "not lt_git( $v2, $v1 )" );
+            ok( gt_git( $v2, $v1 ), "gt_git( $v2, $v1 )" );
+            ok( !le_git( $v2, $v1 ), "le_git( $v2, $v1 )" );
+            ok( ge_git( $v2, $v1 ), "ge_git( $v2, $v1 )" );
+            ok( !eq_git( $v2, $v1 ), "not eq_git( $v2, $v1 )" );
+            ok( ne_git( $v2, $v1 ), "ne_git( $v2, $v1 )" );
+            is( cmp_git( $v2, $v1 ), 1, "cmp_git( $v2, $v1 )" );
+
+        }
+    }
+}
+
+# the test data
+my @sorted = (
+    '0.99',                   '0.99.7a',
+    '0.99.7c',                '0.99.7d',
+    '0.99.8',                 '0.99.9c',
+    '0.99.9g',                '1.0',
+    '1.0.0a',                 '1.0.2',
+    '1.0.3',                  '1.3.0',
+    '1.3.GIT',                '1.3.1',
+    '1.3.2',                  '1.4.0.rc1',
+    '1.4.1',                  'v1.5.3.7-976-gcd39076',
+    'v1.5.3.7-1198-g467f42c', '1.6.6',
+    '1.7.0.2.msysgit.0',      '1.7.0.4',
+    '1.7.1.rc0',              '1.7.1.rc1',
+    '1.7.1.rc2',              'v1.7.1',
+    '1.7.1.1.gc8c07',         '1.7.1.209.gd60ad81',
+    '1.7.1.211.g54fcb21',     '1.7.1.236.g81fa0',
+    '1.7.1.1',                '1.7.1.1.1.g66bd8ab',
+    '1.7.2.rc0',              '1.7.2.rc0.1.g078e',
+    '1.7.2.rc0.10.g1ba5c',    '1.7.2.rc0.13.gc9eaaa',
+    'git version 2.8.0.rc3',  'v2.8.0.2',
 );
 
-# operator reversal: $a op $b <=> $b rop $a
-my %reverse = (
-    eq_git => 'eq_git',
-    ne_git => 'ne_git',
-    ge_git => 'le_git',
-    gt_git => 'lt_git',
-    le_git => 'ge_git',
-    lt_git => 'gt_git',
-);
-my %negate = (
-    ne_git => 'eq_git',
-    eq_git => 'ne_git',
-    ge_git => 'lt_git',
-    gt_git => 'le_git',
-    le_git => 'gt_git',
-    lt_git => 'ge_git',
-);
-my %cmp = (
-    lt_git => -1,
-    eq_git => 0,
-    gt_git => 1,
+my @same = (
+    [ '0.99.9l', '1.0rc4' ],
+    [ '1.0.0',                'v1.0.0',  '1.0' ],
+    [ '1.0.0a',               '1.0.1' ],
+    [ '1.0.0b',               'v1.0.0b', '1.0.2' ],
+    [ '1.0.rc2',              '0.99.9i' ],
+    [ '1.7.1',                'v1.7.1',  '1.7.1.0' ],
+    [ '1.7.1.1.gc8c07',       '1.7.1.1.g5f35a' ],
+    [ '1.7.2.rc0.13.gc9eaaa', '1.7.2.rc0.13.gc9eaaa' ],
+    [ 'git version 2.7.0', '2.7', '2.7.0', '2.7.0.0' ],
 );
 
-@true = (
-    @true,
-    map { [ $_->[2], $reverse{ $_->[1] }, $_->[0], $_->[3] || () ] } @true
-);
+# pick up a random git version
+my $random = shift @ARGV || join '.', int( 1 + rand 4 ), map int rand 13,
+  1 .. 2 + rand 2;
+diag "fake git version $random";
 
-plan tests => 5 + 7 * @lesser + 7 * @greater + 2 * @true
-            + 2 * grep exists $cmp{ $_->[1] }, @true;
+# an RC is always lesser
+my @random = ( "$random.rc1", $random );
 
-# eq_git
-ok( eq_git($version, $version), "$version eq $version" );
-ok( !eq_git($version, $_), "$version not eq $_" ) for @greater, @lesser;
+# compute a sorted list around $random
+# other versions based on the current one
+{
+    my @parts = split /\./, $random;
+    for ( reverse 0 .. $#parts ) {
+        local $" = '.';
+        my @v = @parts;
+        $v[$_]++;
+        push @random, "@v";
+        next if 0 > ( $v[$_] -= 2 );
+        unshift @random, "@v";
+    }
+}
 
-# ne_git
-ok( ne_git($version, $_), "$version ne $_" ) for @greater, @lesser;
-ok( !ne_git($version, $version), "$version not ne $version" );
+# the actual tests
+plan tests => plan_for( \@sorted ) + plan_for( \@random )    # all sorted lists
+  + 7 * sum map @$_ * @$_, @same    # all comparisons with all siblings
+  ;
 
-# gt_git
-ok( gt_git($version, $_),  "$version gt $_" )     for @lesser;
-ok( !gt_git($version, $_), "$version not gt $_" ) for @greater;
+test_sorted( \@sorted );
+test_sorted( \@random );
 
-# le_git
-ok( lt_git($version, $_),  "$version lt $_" )     for @greater;
-ok( !lt_git($version, $_), "$version not lt $_" ) for @lesser;
-
-# le_git
-ok( le_git($version, $_), "$version le $_" ) for $version, @greater;
-ok( !le_git($version, $_), "$version not le $_" ) for @lesser;
-
-# ge_git
-ok( ge_git($version, $_), "$version ge $_" ) for $version, @lesser;
-ok( !ge_git($version, $_), "$version not ge $_" ) for @greater;
-
-# cmp_git
-is( cmp_git($version, $version), 0, "$version eq $version" );
-is( cmp_git($version, $_), -1, "$version cmp $_" ) for @greater;
-is( cmp_git($version, $_), 1, "$version cmp $_" ) for @lesser;
-
-# test a number of special cases
-for (@true) {
-    my ( $v1, $op, $v2 ) = @$_;
-    my $nop = $negate{$op};
-
-    no strict 'refs';
-    ok( &$op($v1, $v2), "$v1 $op $v2" );
-    ok( !&$nop($v1, $v2), "$v1 not $nop $v2" );
-
-    for ( $op ) {
-        if ( exists $cmp{$_} ) {
-            is( cmp_git( $v1, $v2 ), $cmp{$_},  "$v1 cmp $v2" );
-            is( cmp_git( $v2, $v1 ), -$cmp{$_}, "$v2 cmp $v1" );
+for my $twins (@same) {
+    for my $v1 (@$twins) {
+        for my $v2 (@$twins) {
+            ok( !lt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
+            ok( !gt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
+            ok( le_git( $v1, $v2 ), "le_git( $v1, $v2 )" );
+            ok( ge_git( $v1, $v2 ), "ge_git( $v1, $v2 )" );
+            ok( eq_git( $v1, $v2 ), "eq_git( $v1, $v2 )" );
+            ok( !ne_git( $v1, $v2 ), "not ne_git( $v1, $v2 )" );
+            is( cmp_git( $v1, $v2 ), 0, "cmp_git( $v1, $v2 )" );
         }
     }
 }
