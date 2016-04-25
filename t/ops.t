@@ -54,6 +54,17 @@ sub test_sorted {
     }
 }
 
+sub test_same {
+    my ( $v1, $v2 ) = @_;
+    ok( !lt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
+    ok( !gt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
+    ok( le_git( $v1, $v2 ), "le_git( $v1, $v2 )" );
+    ok( ge_git( $v1, $v2 ), "ge_git( $v1, $v2 )" );
+    ok( eq_git( $v1, $v2 ), "eq_git( $v1, $v2 )" );
+    ok( !ne_git( $v1, $v2 ), "not ne_git( $v1, $v2 )" );
+    is( cmp_git( $v1, $v2 ), 0, "cmp_git( $v1, $v2 )" );
+}
+
 # the test data
 my @sorted = (
     '0.99',                   '0.99.7a',
@@ -122,13 +133,7 @@ test_sorted( \@random );
 for my $twins (@same) {
     for my $v1 (@$twins) {
         for my $v2 (@$twins) {
-            ok( !lt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
-            ok( !gt_git( $v1, $v2 ), "lt_git( $v1, $v2 )" );
-            ok( le_git( $v1, $v2 ), "le_git( $v1, $v2 )" );
-            ok( ge_git( $v1, $v2 ), "ge_git( $v1, $v2 )" );
-            ok( eq_git( $v1, $v2 ), "eq_git( $v1, $v2 )" );
-            ok( !ne_git( $v1, $v2 ), "not ne_git( $v1, $v2 )" );
-            is( cmp_git( $v1, $v2 ), 0, "cmp_git( $v1, $v2 )" );
+            test_same( $v1, $v2 );
         }
     }
 }
