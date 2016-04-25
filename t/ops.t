@@ -11,7 +11,7 @@ my $shuffle = 3;
 sub plan_for {
     my $sorted = shift;
     return $shuffle    # shuffle rounds
-     + @$sorted        # self-equality
+     + @$sorted * 7    # self-equality
      + 7 * ( @$sorted * ( @$sorted - 1 ) )    # compare with all successors
 }
 
@@ -28,7 +28,7 @@ sub test_sorted {
     while ( my $v1 = shift @$sorted ) {
 
         # reflexivity
-        ok( eq_git( $v1, $v1 ), "eq_git( $v1, $v1 )" );
+        test_same( $v1, $v1 );
 
         for my $v2 (@$sorted) {
 
