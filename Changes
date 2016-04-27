@@ -2,6 +2,9 @@ Revision history for Git-Version-Compare
 
 {{$NEXT}}
 
+1.002 2016-04-27 BOOK
+    - Increased the test coverage (from ~400 to ~11000 unit tests)
+
 1.001 2016-02-20 BOOK
     - Changed the internal format used for comparisons to fix an issue
       with version numbers like v1.5.3.7-1198-g467f42c
