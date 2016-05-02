@@ -2,6 +2,9 @@ Revision history for Git-Version-Compare
 
 {{$NEXT}}
 
+1.003 2016-05-03 BOOK
+    - Added support for version strings with comments (thanks to PINE)
+
 1.002 2016-04-27 BOOK
     - Increased the test coverage (from ~400 to ~11000 unit tests)
 
