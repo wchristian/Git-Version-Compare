@@ -6,7 +6,9 @@ use Git::Version::Compare qw( looks_like_git eq_git );
 my @ok = (
 
     # actual output from `git --version`
+    "git version 1.0.0a\n",
     "git version 2.7.0\n",
+    "git version 2.6.4 (Apple Git-63)\n",
 
     # just the version number
     '0.99.7', '0.99.9l', '1.2.3', '1.2.3', '1.8.0.rc3', '1.8.0', '1.8.0.3',

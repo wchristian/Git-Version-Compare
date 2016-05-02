@@ -66,6 +66,7 @@ sub looks_like_git {
           [0-9]+(?:[.-](?:0[ab]?|[1-9][0-9a-z]*|[a-zA-Z]+))*  # x.y.z.*
           (?:[.-]?rc[0-9]+)?                                  # rc
           (?:[.-](GIT|[1-9][0-9]*[.-]g[A-Fa-f0-9]+))?         # devel
+          (?:\ .*)?                                           # comment
          $/x;
 }
 
@@ -77,9 +78,10 @@ sub _normalize {
     croak "$v does not look like a Git version" if !looks_like_git($v);
 
     # reformat git.git tag names, output of `git --version`
-    $v =~ s/^v|^git version |\.msysgit.*//g;
+    $v =~ s/^v|^git version |\.msysgit.*|[\012\015]+\z//g;
     $v =~ y/-/./;
     $v =~ s/0rc/0.rc/;
+    ($v) = split / /, $v;    # drop anything after the version
     return $version_alias{$v} if defined $version_alias{$v};
 
     my @v = split /\./, $v;
