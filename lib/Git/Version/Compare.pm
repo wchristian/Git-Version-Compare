@@ -82,8 +82,11 @@ sub _normalize {
     $v =~ y/-/./;
     $v =~ s/0rc/0.rc/;
     ($v) = split / /, $v;    # drop anything after the version
+
+    # can't use exists() because the assignment in the @ops created the slot
     return $version_alias{$v} if defined $version_alias{$v};
 
+    # split the dotted version string
     my @v = split /\./, $v;
     my ( $r, $c ) = ( 0, 0 );
 
