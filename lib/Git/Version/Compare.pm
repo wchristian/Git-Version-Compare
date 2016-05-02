@@ -95,7 +95,9 @@ sub _normalize {
     ($r) = splice @v, -1 if substr( $v[-1], 0, 2 ) eq 'rc';
     $r &&= do { $r =~ s/rc//; sprintf '-%02d', $r };
 
-    join( '.', map sprintf( '%02d', $_ ), ( @v, 0, 0, 0 )[ 0 .. 3 ] )
+    # compute and cache normalized string
+    return $version_alias{$v} =
+        join( '.', map sprintf( '%02d', $_ ), ( @v, 0, 0, 0 )[ 0 .. 3 ] )
       . ( $r || '.00' )
       . sprintf( '.%04d', $c );
 }
