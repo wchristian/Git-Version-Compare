@@ -17,6 +17,9 @@ my @ok = (
     # Win32 msysgit
     '1.9.4.msysgit.0', '1.9.5.msysgit.1',
 
+    # Git for Windows
+    '2.8.0.windows.1',
+
     # plausible version numbers
     '1.0.rc4', '1.0rc4', '1.6',
 

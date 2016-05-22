@@ -86,7 +86,8 @@ my @sorted = (
     '1.7.2.rc0',              '1.7.2.rc0.1.g078e',
     '1.7.2.rc0.10.g1ba5c',    '1.7.2.rc0.13.gc9eaaa',
     'git version 2.6.4 (Apple Git-63)',
-    'git version 2.8.0.rc3',  'v2.8.0.2',
+    'git version 2.8.0.rc3',  '2.8.0.windows.1',
+    'v2.8.0.2',
 );
 
 my @same = (
